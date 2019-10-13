@@ -1,0 +1,34 @@
+#!/bin/sh
+
+#=================================================================#
+# variable
+#=================================================================#
+
+RESULT_TIME=`ps aux  | grep SELECT | awk '{print $10}'`
+COUNT=0
+KILL_TARGET=''
+
+
+#=================================================================#
+# functions
+#=================================================================#
+
+__kill(){
+    for i in ${RESULT_TIME}
+    do
+        ((COUNT ++))
+        if [ ${#i} -ge 6 ];then
+            KILL_TARGET=`ps aux | grep SELECT | awk -v cnt=${COUNT} 'NR==cnt' | awk '{print $2}'`
+            PGPASSWORD=testpass /usr/local/pgsql953/bin/psql -U testuser -h 192.168.11.1 -d testdb -c "SELECT pg_cancel_backend(${KILL_TARGET})"
+        fi
+    done
+}
+
+
+#=================================================================#
+# main
+#=================================================================#
+
+__kill
+
+exit 0
